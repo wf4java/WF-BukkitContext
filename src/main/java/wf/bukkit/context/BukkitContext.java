@@ -2,7 +2,6 @@ package wf.bukkit.context;
 
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.Nullable;
 import wf.bukkit.context.annotations.Autowired;
 import wf.bukkit.context.annotations.BukkitConfiguration;
 import wf.bukkit.context.annotations.Component;
@@ -23,7 +22,6 @@ public class BukkitContext {
     private final Map<Class<?>, Object> beans = new HashMap<>();
     private final Map<Class<?>, List<Class<?>>> dependencyGraph = new HashMap<>();
 
-    @Nullable
     private final BukkitConfiguration bukkitConfiguration;
 
     public static BukkitContext run(JavaPlugin plugin) {

@@ -138,3 +138,28 @@ public class SellItemExecutor extends Executor {
 
 
 
+
+Эти зависимости добавляем по мере необходимости:
+```xml
+<dependency>
+    <groupId>ru.cwcode.commands</groupId>
+    <artifactId>PaperCommands</artifactId>
+    <version>1.1.1</version>
+    <scope>provided</scope>
+</dependency>
+
+<dependency>
+    <groupId>ru.cwcode.tkach.config</groupId>
+    <artifactId>PaperConfig</artifactId>
+    <version>2.1.0</version>
+    <scope>provided</scope>
+</dependency>
+
+<dependency>
+    <groupId>ru.cwcode.tkach.refreshmenu</groupId>
+    <artifactId>RefreshMenu</artifactId>
+    <version>1.1.0</version>
+    <scope>provided</scope>
+</dependency>
+```
+

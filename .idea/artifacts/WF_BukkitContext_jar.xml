@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="WF-BukkitContext:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/WF_BukkitContext_jar</output-path>
+    <root id="archive" name="WF-BukkitContext.jar">
+      <element id="module-output" name="WF-BukkitContext" />
+      <element id="extracted-dir" path="$USER_HOME$/.m2/repository/cglib/cglib/3.3.0/cglib-3.3.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.m2/repository/org/ow2/asm/asm/7.1/asm-7.1.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

@@ -8,6 +8,7 @@ import wf.bukkit.context.annotations.Component;
 import wf.bukkit.context.annotations.Init;
 import wf.bukkit.context.depeneds.config.ConfigLoader;
 import wf.bukkit.context.depeneds.config.annotation.Config;
+import wf.bukkit.context.depeneds.menu.MenuLoader;
 import wf.bukkit.context.utils.ClassUtils;
 
 import java.io.File;
@@ -53,6 +54,9 @@ public class BukkitContext {
 
         if(bukkitConfiguration.enableConfig())
             ConfigLoader.configure(this, plugin);
+
+        if(bukkitConfiguration.enableMenu())
+            MenuLoader.configure(this, plugin);
     }
 
 

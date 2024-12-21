@@ -5,7 +5,7 @@
   <dependency>
     <groupId>io.github.wf4java</groupId>
     <artifactId>WF-BukkitContext</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
   </dependency>
 ```
 

@@ -11,14 +11,15 @@ import java.util.List;
 public class ConfigLoader {
 
 
-    public static List<Class<?>> getBeans() {
+    private static List<Class<?>> getBeans() {
         return List.of(
                 ConfigManager.class
         );
     }
 
+
     public static void configure(BukkitContext bukkitContext, JavaPlugin plugin) {
-        ConfigLoader.getBeans().forEach(bukkitContext::addPreloadedClass);
+        getBeans().forEach(bukkitContext::addPreloadedClass);
     }
 
 

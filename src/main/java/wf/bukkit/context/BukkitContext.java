@@ -1,10 +1,13 @@
 package wf.bukkit.context;
 
+import org.bukkit.Bukkit;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import wf.bukkit.context.annotations.Autowired;
 import wf.bukkit.context.annotations.BukkitConfiguration;
 import wf.bukkit.context.annotations.Component;
+import wf.bukkit.context.annotations.EventListener;
 import wf.bukkit.context.annotations.Init;
 import wf.bukkit.context.depeneds.config.ConfigLoader;
 import wf.bukkit.context.depeneds.config.annotation.Config;
@@ -48,21 +51,20 @@ public class BukkitContext {
     }
 
 
-
     private void configure(JavaPlugin plugin) {
-        if(bukkitConfiguration == null) return;
+        if (bukkitConfiguration == null) return;
 
-        if(bukkitConfiguration.enableConfig())
+        if (bukkitConfiguration.enableConfig())
             ConfigLoader.configure(this, plugin);
 
-        if(bukkitConfiguration.enableMenu())
+        if (bukkitConfiguration.enableMenu())
             MenuLoader.configure(this, plugin);
     }
 
 
     private void buildDependencyGraph() {
         for (Class<?> clazz : classes) {
-            if(clazz.isInterface() || clazz.isEnum() || clazz.isAnnotation())
+            if (clazz.isInterface() || clazz.isEnum() || clazz.isAnnotation())
                 continue;
 
             Component component = getComponentAnnotation(clazz);
@@ -89,14 +91,13 @@ public class BukkitContext {
     }
 
 
-
     private void createBeans() {
         for (Class<?> clazz : sortedClasses) {
             if (beans.containsKey(clazz))
                 continue;
 
             Constructor<?>[] constructors = clazz.getDeclaredConstructors();
-            if(constructors.length == 0)
+            if (constructors.length == 0)
                 throw new RuntimeException("Not found constructor for class: " + clazz.getName());
 
             Constructor<?> constructor = constructors[0];
@@ -121,33 +122,39 @@ public class BukkitContext {
     }
 
     private void autowiredAll(JavaPlugin plugin, Class<?> clazz) {
-        for(Class<?> c : getAllClasses(getFileFromPlugin(plugin), clazz)) {
-            for(Field field : c.getDeclaredFields()) {
-                if(!Modifier.isStatic(field.getModifiers())) continue;
+        for (Class<?> c : getAllClasses(getFileFromPlugin(plugin), clazz)) {
+            for (Field field : c.getDeclaredFields()) {
+                if (!Modifier.isStatic(field.getModifiers())) continue;
 
                 Autowired autowired = field.getAnnotation(Autowired.class);
-                if(autowired == null) continue;
+                if (autowired == null) continue;
 
                 Object bean = getBean(field.getType());
-                if(bean == null)
+                if (bean == null)
                     throw new RuntimeException("Bean of class: " + field.getType().getSimpleName() + " for autowired to: " + c.getSimpleName() + " not founded!");
 
                 field.setAccessible(true);
-                try { field.set(null, bean); }
-                catch (IllegalAccessException e) { throw new RuntimeException(e); }
+                try {
+                    field.set(null, bean);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }
 
     private void callInit() {
-        for(Class<?> clazz : sortedClasses) {
-            for(Method method : clazz.getDeclaredMethods()) {
+        for (Class<?> clazz : sortedClasses) {
+            for (Method method : clazz.getDeclaredMethods()) {
                 Init init = method.getAnnotation(Init.class);
-                if(init == null) continue;
+                if (init == null) continue;
 
                 method.setAccessible(true);
-                try { method.invoke(getBean(clazz)); }
-                catch (Exception e) { throw new RuntimeException(e); }
+                try {
+                    method.invoke(getBean(clazz));
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }
@@ -158,8 +165,9 @@ public class BukkitContext {
             field.setAccessible(true);
 
             return (File) field.get(javaPlugin);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        catch (Exception e) { throw new RuntimeException(e);}
     }
 
 
@@ -177,10 +185,9 @@ public class BukkitContext {
     }
 
 
-
     private Object newInstanceOfObject(Class<?> clazz, Constructor<?> constructor, Object[] parameters) {
-        if(bukkitConfiguration != null) {
-            if(bukkitConfiguration.enableConfig()) {
+        if (bukkitConfiguration != null) {
+            if (bukkitConfiguration.enableConfig()) {
                 Config config = clazz.getAnnotation(Config.class);
                 if (config != null)
                     return ConfigLoader.instanceOfConfig(this, config, clazz);
@@ -190,18 +197,35 @@ public class BukkitContext {
 
 
         Object instance;
-        try { instance = constructor.newInstance(parameters); }
-        catch (Exception e) { throw new RuntimeException(e); }
+        try {
+            instance = constructor.newInstance(parameters);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+
+        if (clazz.getAnnotation(EventListener.class) != null) {
+            if (instance instanceof Listener listener)
+                Bukkit.getPluginManager().registerEvents(listener, getBean(JavaPlugin.class));
+
+            else
+                Bukkit.getPluginManager().registerEvents(
+                        (Listener) Proxy.newProxyInstance(
+                                instance.getClass().getClassLoader(),
+                                new Class<?>[]{Listener.class},
+                                (proxy, method, args) -> method.invoke(instance, args)),
+                        getBean(JavaPlugin.class));
+        }
+
 
         return instance;
     }
 
 
-
     private static List<Class<?>> loadClasses(File jarFile, Class<?> clazz) {
         return ClassUtils.scan(jarFile, clazz).stream()
                 .filter((c) -> {
-                    if(c.isInterface() || c.isEnum() || c.isAnnotation())
+                    if (c.isInterface() || c.isEnum() || c.isAnnotation())
                         return false;
 
                     return getComponentAnnotation(c) != null;
@@ -219,12 +243,12 @@ public class BukkitContext {
 
     private static Component getComponentAnnotation(Class<?> clazz) {
         Component component = clazz.getAnnotation(Component.class);
-        if(component != null)
+        if (component != null)
             return component;
 
-        for(Annotation annotation : clazz.getAnnotations()) {
+        for (Annotation annotation : clazz.getAnnotations()) {
             component = annotation.annotationType().getAnnotation(Component.class);
-            if(component != null)
+            if (component != null)
                 return component;
         }
 
@@ -247,9 +271,6 @@ public class BukkitContext {
         visited.add(clazz);
         sorted.add(clazz);
     }
-
-
-
 
 
 }

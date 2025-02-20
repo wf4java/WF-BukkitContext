@@ -13,8 +13,8 @@ public class ConfigManager {
     private final YmlConfigManager yml;
 
 
-    private ConfigManager(JavaPlugin plugin) {
-        this.yml = new YmlConfigManager(new PaperPluginConfigPlatform(plugin));
+    public ConfigManager(YmlConfigManager yml) {
+        this.yml = yml;
         this.yml.scheduleAutosave(Duration.ofMinutes(5), configPersistOptions -> { });
     }
 
